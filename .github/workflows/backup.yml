@@ -1,9 +1,7 @@
 name: backup-kb
-
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:   # 手動実行ボタンも出す
 
 permissions:
   contents: write
@@ -24,13 +22,15 @@ jobs:
       - name: List files (debug)
         run: ls -al dist
 
+      - name: List files (debug)
+        run: ls -al dist
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: backup-${{ github.sha }}
           name: backup-${{ github.sha }}
           make_latest: false
-          # ← ファイル名ズレの事故を避けるため “dist/*.zip” をアップロード対象に
-          files: dist/*.zip
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
