@@ -2,6 +2,10 @@ name: backup-kb
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:  # 手動実行ボタンも出す（任意）
+
+permissions:
+  contents: write
 
 jobs:
   zip-and-release:
@@ -11,10 +15,13 @@ jobs:
       - name: Zip KB & Core
         run: |
           mkdir -p dist
-          zip -r dist/kb_backup_$GITHUB_SHA.zip kb system/core.yaml
+          zip -r dist/kb_backup_${GITHUB_SHA}.zip kb system/core.yaml
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/kb_backup_*.zip
+          tag_name: backup-${{ github.sha }}
+          name: backup-${{ github.sha }}
+          make_latest: false
+          files: dist/kb_backup_${{ github.sha }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
