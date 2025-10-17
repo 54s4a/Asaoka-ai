@@ -1,0 +1,20 @@
+name: backup-kb
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  zip-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip KB & Core
+        run: |
+          mkdir -p dist
+          zip -r dist/kb_backup_$GITHUB_SHA.zip kb system/core.yaml
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/kb_backup_*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
