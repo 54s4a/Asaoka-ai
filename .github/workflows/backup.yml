@@ -1,8 +1,9 @@
 name: backup-kb
+
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:   # 手動実行ボタンも出す
 
 permissions:
   contents: write
@@ -16,7 +17,9 @@ jobs:
       - name: Zip KB & Core
         run: |
           mkdir -p dist
-          zip -r dist/kb_backup_${{ github.sha }}.zip kb system/core.yaml
+          ZIP="dist/kb_backup_${GITHUB_SHA}.zip"
+          echo "ZIP PATH => $ZIP"
+          zip -r "$ZIP" kb system/core.yaml
 
       - name: List files (debug)
         run: ls -al dist
@@ -27,6 +30,7 @@ jobs:
           tag_name: backup-${{ github.sha }}
           name: backup-${{ github.sha }}
           make_latest: false
-          files: dist/kb_backup_${{ github.sha }}.zip
+          # ← ファイル名ズレの事故を避けるため “dist/*.zip” をアップロード対象に
+          files: dist/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
