@@ -3,7 +3,7 @@ name: backup-kb
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:   # 手動実行ボタンも出す
 
 permissions:
   contents: write
@@ -15,25 +15,22 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Zip KB & Core
-        # ← 生成と同時に ZIP の実パスを表示する
         run: |
           mkdir -p dist
           ZIP="dist/kb_backup_${GITHUB_SHA}.zip"
-          echo "ZIP PATH: $ZIP"
+          echo "ZIP PATH => $ZIP"
           zip -r "$ZIP" kb system/core.yaml
 
       - name: List files (debug)
-        # ← dist 内に ZIP が実在するか一覧表示（確認の決め手）
         run: ls -al dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          # ← タグとリリース名はコミットSHAでユニーク化
           tag_name: backup-${{ github.sha }}
           name: backup-${{ github.sha }}
           make_latest: false
-          # ← 上で作った ZIP と完全一致させる（同じ GITHUB_SHA を使用）
-          files: dist/kb_backup_${{ github.sha }}.zip
+          # ← ファイル名ズレの事故を避けるため “dist/*.zip” をアップロード対象に
+          files: dist/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
