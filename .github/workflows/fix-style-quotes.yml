@@ -1,0 +1,65 @@
+name: fix-style-quotes
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run fixer
+        run: |
+          python - <<'PY'
+          import os, re, hashlib
+
+          EXTS = {'.md', '.yml', '.yaml'}
+          SKIP_DIRS = {'.git','node_modules','rag/vector_store','__pycache__','.venv','.mypy_cache','.pytest_cache'}
+          changed = []
+
+          for root, dirs, files in os.walk('.'):
+              dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+              for f in files:
+                  _, ext = os.path.splitext(f)
+                  if ext not in EXTS:
+                      continue
+                  p = os.path.join(root, f)
+                  with open(p, 'r', encoding='utf-8', errors='ignore') as fp:
+                      s = fp.read()
+                  orig = s
+
+                  # 1) 『』『』/「」準拠 → 『』/「」準拠（空白ゆれも吸収）
+                  s = s.replace('『』『』/「」準拠', '『』/「」準拠')
+                  s = s.replace('『』『』 / 「」準拠', '『』/「」準拠')
+
+                  # 2) style: 敬体/『』『』/「」準拠 → style: 敬体/『』/「」準拠
+                  s = re.sub(r'(style:\s*敬体\s*/\s*)『』『』(\s*/\s*「」\s*準拠)', r'\1『』\2', s)
+
+                  # 3) 単純な重複『』『』 → 『』
+                  s = s.replace('『』『』', '『』')
+
+                  if s != orig:
+                      with open(p, 'w', encoding='utf-8') as fp:
+                          fp.write(s)
+                      changed.append(p)
+
+          print(f"CHANGED {len(changed)} files")
+          PY
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: fix/style-quote-dup
+          commit-message: "fix(style): normalize 『』 duplication + update style tags to 『』/「」準拠"
+          title: "fix(style): 『』『』 → 『』 に統一（styleタグ含む）"
+          body: |
+            自動修正ボットにより一括置換を実施しました。
+            - `『』『』/「」準拠` → `『』/「」準拠`
+            - 重複 `『』『』` → `『』`
+            対象拡張子: .md, .yml, .yaml
+          labels: |
+            chore
