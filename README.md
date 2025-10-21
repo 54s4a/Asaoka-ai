@@ -28,7 +28,7 @@ asaoka-ai/
 │   ├ extract.py            # 事実・意図・条件の抽出
 │   ├ guardrails.py         # 禁句・圧力検出
 │   ├ meter.py              # 合意メーター（0〜100）
-│   └ style_polish.py       # 敬体・『』『』整形
+│   └ style_polish.py       # 敬体・『』整形
 │
 ├─ tests/gold/
 │   └ sample_case.json      # 回帰テスト用
