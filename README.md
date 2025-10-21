@@ -52,7 +52,7 @@ title: フィードバックの口調は事実→意図→合意の順で整え�
 theme: workplace
 phase: 前提抽出
 guard: 圧力回避
-style: 敬体/『』『』/「」準拠
+style: 敬体/『』/「」準拠
 claim: CLAIM-002_0006
 date: 2025-10-19
 ---
@@ -63,7 +63,7 @@ date: 2025-10-19
 theme	テーマ（恋愛・職場・親子など）
 phase	段階（前提抽出・仮説提示・合意化など）
 guard	注意点（禁句・圧力回避など）
-style	文体ルール（敬体・『』『』・「」）
+style	文体ルール（敬体・『』・「」）
 claim	思想の幹＋枝番号
 date	作成・更新日
 🔍 検索・参照構造（RAG）
@@ -124,7 +124,7 @@ purpose:
 contract:
   output_order: ["【核】","【中立】","【実務】","【一体化まとめ】","【次の一手】"]
   tone: 敬体・断定過剰回避・非煽動
-  quotes: 『』『』/「」厳守
+  quotes: 『』/「」厳守
   bans:
     - Yes/No詰め
     - 人格攻撃
