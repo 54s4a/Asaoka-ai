@@ -106,26 +106,43 @@ import requests
 
 app = FastAPI()
 
+# ✅ 環境変数（RenderのEnvironmentで登録済みの2つを呼び出す）
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 LINE_REPLY_URL = "https://api.line.me/v2/bot/message/reply"
 
+# 🔹 LINE → AsaokaAI → LINE の接続ルート
 @app.post("/line/webhook")
 async def line_webhook(request: Request):
     body = await request.json()
     events = body.get("events", [])
+
     for event in events:
         if event.get("type") == "message":
             user_msg = event["message"]["text"]
             reply_token = event["replyToken"]
-            # 一旦テスト用の固定返信
-            reply_text = f"受信しました：{user_msg}"
+
+            # AsaokaAIの /answer エンドポイントへ問い合わせ
+            res = requests.post(
+                "https://asaoka-ai.onrender.com/answer",
+                json={"question": user_msg}
+            )
+
+            # /answer からの返答を取得
+            try:
+                answer_text = res.json().get("answer", "処理エラーが発生しました。")
+            except:
+                answer_text = "AIの応答を取得できませんでした。"
+
+            # LINEへ返信
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}"
             }
             data = {
                 "replyToken": reply_token,
-                "messages": [{"type": "text", "text": reply_text}]
+                "messages": [{"type": "text", "text": answer_text}]
             }
             requests.post(LINE_REPLY_URL, headers=headers, json=data)
+
     return "OK"
