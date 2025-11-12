@@ -301,7 +301,7 @@ async def line_webhook(request: Request, background_tasks: BackgroundTasks):
             # ログ用：LINEイベントの送信時刻と現在時刻を比較（リトライ判断用）
             evt_ms = event.get("timestamp")
             now_ms = int(dt.datetime.now().timestamp() * 1000)
-            app.logger.info(f"[LINE] event_ts={evt_ms} now_ms={now_ms} diff_ms={now_ms - (evt_ms or now_ms)}")
+            print(f"[LINE] event_ts={evt_ms} now_ms={now_ms} diff_ms={now_ms - (evt_ms or now_ms)}")
             if reply_token:
                 background_tasks.add_task(reply_job, reply_token, user_msg)
 
