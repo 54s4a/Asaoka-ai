@@ -145,7 +145,13 @@ def make_answer_from_query(query: str, k: int = 8) -> Dict[str, Any]:
 
 
 @app.post("/answer")
-def answer(payload: Ask):
+def answer(payload: Ask, request: Request):
+    # 内部APIキーが設定されている場合だけチェック
+    if INTERNAL_API_KEY:
+        api_key = request.headers.get("X-API-Key")
+        if api_key != INTERNAL_API_KEY:
+            return {"ok": False, "reason": "forbidden"}
+
     return make_answer_from_query(payload.query, payload.k)
 
 
