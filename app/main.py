@@ -5,6 +5,7 @@ import numpy as np
 import json, os, yaml, re
 import hashlib
 import requests
+import hmac, base64  # ★ここを追加
 from typing import List, Dict, Any, Optional
 import datetime as dt
 
@@ -169,6 +170,14 @@ def health():
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 LINE_REPLY_URL = "https://api.line.me/v2/bot/message/reply"
+INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")  # /answer 用の内部キー
+def verify_line_signature(channel_secret: str, body_bytes: bytes, signature: str) -> bool:
+    """LINE の X-Line-Signature を検証する"""
+    if not channel_secret or not signature:
+        return False
+    mac = hmac.new(channel_secret.encode("utf-8"), body_bytes, hashlib.sha256).digest()
+    expected = base64.b64encode(mac).decode("utf-8")
+    return hmac.compare_digest(expected, signature)
 
 # ── 4区分ルーティング用（追記） ─────────────────────────
 IGNORE_PATTERNS = [
